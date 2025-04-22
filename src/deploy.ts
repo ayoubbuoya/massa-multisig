@@ -1,56 +1,53 @@
-import * as dotenv from 'dotenv';
-import { readFileSync } from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { deploySC, WalletClient } from '@massalabs/massa-sc-deployer';
 import {
+  Account,
   Args,
   ArrayTypes,
-  BUILDNET_CHAIN_ID,
-  DefaultProviderUrls,
-  fromMAS,
-  MassaUnits,
-  MAX_GAS_DEPLOYMENT,
+  Mas,
+  SmartContract,
+  Web3Provider,
 } from '@massalabs/massa-web3';
+import { getScByteCode } from './utils';
 
-dotenv.config();
+const account = await Account.fromEnv();
+const provider = Web3Provider.buildnet(account);
 
-const privKey = process.env.WALLET_PRIVATE_KEY;
-if (!privKey) throw new Error('Missing WALLET_PRIVATE_KEY in .env file');
+console.log('Deploying contract...');
 
-const deployerAccount = await WalletClient.getAccountFromSecretKey(privKey);
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(path.dirname(__filename));
+const multisigByteCode = getScByteCode('build', 'Multisig.wasm');
 
 const ONE_HOUR = 60 * 60 * 1000;
 const ONE_DAY = 24 * ONE_HOUR;
 
 const owners: string[] = [
-  'AU12jWU88jCx8Pr5gptgM3EUfYuoA5g2jCauFRLZyWzEB7WtByTod',
-  'AU1cBirTno1FrMVpUMT96KiQ97wBqqM1z9uJLr3XZKQwJjFLPEar',
+  'AU12Yd4kCcsizeeTEK9AZyBnuJNZ1cpp99XfCZgzS77ZKnwTFMpVE',
+  'AU12dNgDQgXdLDuotLcwUhd4LNhUpoPZ9XXkQF2xxHrhEoUxuhTtU',
 ];
+
 const required = 2;
 const upgradeDelay = ONE_DAY;
 const validationDelay = ONE_HOUR;
 
-(async () => {
-  await deploySC(
-    DefaultProviderUrls.BUILDNET,
-    deployerAccount,
-    [
-      {
-        data: readFileSync(path.join(__dirname, 'build', 'deployer.wasm')),
-        coins: 10n * MassaUnits.oneMassa,
-        args: new Args()
-          .addArray(owners, ArrayTypes.STRING)
-          .addI32(required)
-          .addU64(BigInt(upgradeDelay))
-          .addU64(BigInt(validationDelay)),
-      },
-    ],
-    BUILDNET_CHAIN_ID,
-    fromMAS(0.01),
-    MAX_GAS_DEPLOYMENT,
-  );
-})();
+const constructorArgs = new Args()
+  .addArray(owners, ArrayTypes.STRING)
+  .addI32(BigInt(required))
+  .addU64(BigInt(upgradeDelay))
+  .addU64(BigInt(validationDelay));
+
+const multisig = await SmartContract.deploy(
+  provider,
+  multisigByteCode,
+  constructorArgs,
+  {
+    coins: Mas.fromString('10'),
+  },
+);
+
+console.log('Multisig deployed at:', multisig.address);
+
+const events = await provider.getEvents({
+  smartContractAddress: multisig.address,
+});
+
+for (const event of events) {
+  console.log('Event:', event.data);
+}

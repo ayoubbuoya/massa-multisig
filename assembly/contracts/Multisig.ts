@@ -360,14 +360,15 @@ export function getApprovals(bs: StaticArray<u8>): StaticArray<u8> {
   const txId = args.nextU64().unwrap();
 
   const approvals: string[] = [];
-  const _owners = owners();
+  const _owners: string[] = owners();
 
-  for (let i = 0; i < owners.length; i++) {
+  for (let i = 0; i < _owners.length; i++) {
     const owner = _owners[i];
+
     if (hasApproved(txId, new Address(owner))) {
       approvals.push(owner);
     }
   }
 
-  return nativeTypeArrayToBytes(approvals);
+  return new Args().add(approvals).serialize();
 }

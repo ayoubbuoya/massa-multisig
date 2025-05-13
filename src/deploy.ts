@@ -19,8 +19,8 @@ const ONE_HOUR = 60 * 60 * 1000;
 const ONE_DAY = 24 * ONE_HOUR;
 
 const owners: string[] = [
-  'AU12Yd4kCcsizeeTEK9AZyBnuJNZ1cpp99XfCZgzS77ZKnwTFMpVE',
-  'AU12dNgDQgXdLDuotLcwUhd4LNhUpoPZ9XXkQF2xxHrhEoUxuhTtU',
+  'AU12kpDtAS1dKeqGFBepwi5yAAkx3tCM4TYaXygYJ8ZcTeXLqRtyC',
+  'AU1DTFQyDAdN1UkfYgphvwCdzrcL6tk3uuWncxTZkdmLFGUKwaWk',
 ];
 
 const required = 2;

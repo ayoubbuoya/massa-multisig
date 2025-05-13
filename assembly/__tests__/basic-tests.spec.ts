@@ -3,8 +3,14 @@ import {
   approve,
   constructor,
   getTransactions,
+  getApprovals,
 } from '../contracts/Multisig';
-import { Storage, mockAdminContext, Address } from '@massalabs/massa-as-sdk';
+import {
+  Storage,
+  mockAdminContext,
+  Address,
+  print,
+} from '@massalabs/massa-as-sdk';
 import {
   Args,
   u64ToBytes,
@@ -15,6 +21,7 @@ import {
   Serializable,
   Result,
   bytesToU32,
+  bytesToNativeTypeArray,
 } from '@massalabs/as-types';
 import {
   changeCallStack,
@@ -253,6 +260,10 @@ describe('Multisig contract tests', () => {
 
       expect(hasApproved(opIndex, new Address(ownerAddress)));
     }
+
+    let res = getApprovals(new Args().add(opIndex).serialize());
+
+    print('RES: ' + new Args(res).nextStringArray().unwrap().toString());
 
     switchUser(deployerAddress);
     expect(getApprovalCount(opIndex)).toBe(2);

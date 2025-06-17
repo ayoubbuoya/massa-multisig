@@ -3,7 +3,8 @@
     "version": "0.0.1",
     "description": "",
     "scripts": {
-        "test": "asp --summary",
+        "test:summmary": "asp --summary",
+        "test": "tsx src/tests/index.ts",
         "build": "npx massa-as-compile",
         "deploy": "npm run build && tsx src/deploy.ts",
         "events": "tsx src/events.ts",

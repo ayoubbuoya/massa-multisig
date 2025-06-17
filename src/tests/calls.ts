@@ -55,17 +55,27 @@ export async function transferTokensFromMultisig(
   to: string,
   amount: bigint,
   multisigAddress: string,
+  isNativeCoin: boolean = false,
 ) {
   const txArgs = new Args().addString(to).addU256(amount);
 
   const coinsToUse = Mas.fromString('0.01');
 
-  const transaction = new Transaction(
+  let transaction = new Transaction(
     tokenAddress,
     'transfer',
     coinsToUse,
     txArgs.serialize(),
   );
+
+  if (isNativeCoin) {
+    transaction = new Transaction(
+      to,
+      '',
+      amount,
+      new Uint8Array(),
+    );
+  }
 
   const multisigContractP1 = new SmartContract(provider, multisigAddress);
   const multisigContractP2 = new SmartContract(provider2, multisigAddress);
@@ -208,7 +218,7 @@ export async function executeTransaction(
     'execute',
     new Args().addU64(txId).serialize(),
     {
-      coins: Mas.fromString('0.01'),
+      coins: Mas.fromString('0.05'),
     },
   );
 
